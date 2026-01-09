@@ -8,3 +8,9 @@ class Boards(models.Model):
     owner_id = models.IntegerField()
     members = models.JSONField(default=list, blank=True)
 
+class BoardsDetailView (models.Model):
+    title = models.TextField(max_length=100, blank=True, null=True)
+    owner_id = models.IntegerField()
+    members = models.JSONField(default=list, blank=True)
+    
+
