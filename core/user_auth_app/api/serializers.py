@@ -39,3 +39,22 @@ class RegistrationsSerializer (serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email already exists')
         return value
+
+class EmailCheckSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    exists = serializers.BooleanField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    first_name = serializers.CharField(read_only=True)
+
+    def to_representation(self, data):
+        email = data["email"]
+        user = User.objects.filter(email__iexact=email).first()
+
+        if user:
+            return {
+                "id": user.id,
+                "email": user.email,
+                "fullname": user.first_name,
+            }
+
+        return {"exists": False}

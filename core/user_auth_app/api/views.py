@@ -1,7 +1,7 @@
 from rest_framework.authtoken.models import Token as AuthToken
 from rest_framework import generics
 from user_auth_app.models import UserProfile
-from .serializers import UserProfileSerializer
+from .serializers import UserProfileSerializer, EmailCheckSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import RegistrationsSerializer
@@ -63,3 +63,16 @@ class LogoutView(APIView):
     def post(self, request):
         request.user.auth_token.delete()
         return Response({"message": "Logged out successfully"}, status=200)
+    
+class EmailCheckView(APIView):
+    serializer_class = EmailCheckSerializer
+
+    def get(self, request):
+        email = request.query_params.get("email", "")
+
+        serializer = self.serializer_class(data={"email": email})
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.to_representation(serializer.validated_data))
+    
+
