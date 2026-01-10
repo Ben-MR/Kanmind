@@ -1,35 +1,23 @@
-from rest_framework.views import APIView
-from .serializers import BoardsSerializer, BoardDetailSerializer
-from boards_app.models import Boards
+from django.db.models import Q
 from rest_framework import viewsets
-from .permissions import IsOwnerOrMember
 from rest_framework.permissions import IsAuthenticated
+from boards_app.models import Boards
+from .serializers import BoardsListSerializer, BoardDetailSerializer
+from .permissions import IsOwnerOrMember
 
-class BoardsListViewSet (viewsets.ModelViewSet):
-    queryset = Boards.objects.all()
-    serializer_class = BoardsSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrMember] 
-    
+class BoardsViewSet(viewsets.ModelViewSet):
+    queryset = Boards.objects.all() 
+    serializer_class = BoardsListSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrMember]
+
     def get_queryset(self):
-        qs = Boards.objects.all()
-        uid = self.request.user.id
-
-        if self.action == "list":
-            allowed_ids = [
-                b.id for b in qs
-                if b.owner_id == uid or uid in (b.members or [])
-            ]
-            return qs.filter(id__in=allowed_ids)
-
-        return qs
-
-    def get_serializer_class(self):
-        if self.action in ("retrieve"):
-            return BoardDetailSerializer
-
-        return BoardsSerializer
+        u = self.request.user
+        return Boards.objects.filter(Q(owner=u) | Q(members=u)).distinct()
     
-    # def get_permissions(self):
-    #     if self.action == 'create':
-    #         return [IsAuthenticated()]
-    #     return [IsAuthenticated(), IsOwnerOrMember()]
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return BoardDetailSerializer
+        return BoardsListSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)

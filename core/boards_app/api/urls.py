@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import BoardsListViewSet
+from .views import BoardsViewSet
 from rest_framework import routers
 
 router = routers.SimpleRouter()
-router.register(r'boards', BoardsListViewSet)
+router.register(r'boards', BoardsViewSet)
 urlpatterns = router.urls
 
 # urlpatterns = [

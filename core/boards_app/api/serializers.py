@@ -1,52 +1,71 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from boards_app.models import Boards, BoardsDetailView
-from django.db import models
+from boards_app.models import Boards
 
-class BoardsSerializer(serializers.ModelSerializer):
+User = get_user_model()
+
+
+class BoardsListSerializer(serializers.ModelSerializer):
+    # Frontend contract:
+    # - owner_id: int (read-only)
+    # - members: [int] (read/write)
+
+    owner_id = serializers.IntegerField(read_only=True)
     member_count = serializers.IntegerField(read_only=True)
-    ticket_count=serializers.IntegerField(required=False, default=0)
-    tasks_to_do_count=serializers.IntegerField(required=False, default=0)
-    owner_id=serializers.IntegerField(read_only=True)
-    members = serializers.JSONField(write_only=True)
 
     class Meta:
-        model = Boards        
-        fields = ['id', 'title', 'member_count', 'ticket_count', 'tasks_to_do_count', 'owner_id', 'members']
+        model = Boards
+        fields = [
+            "id",
+            "title",
+            "member_count",
+            "ticket_count",
+            "tasks_to_do_count",
+            "tasks_high_prio_count",
+            "owner_id",
+        ]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["member_count"] = instance.members.count()
+        return data
 
     def create(self, validated_data):
-        request = self.context["request"]
-        validated_data["owner_id"] = request.user.id
+        member_ids = validated_data.pop("members", [])
+        board = Boards.objects.create(**validated_data)
 
-        members = validated_data.get("members") or []
-        validated_data["member_count"] = len(members)
+        if member_ids:
+            users = User.objects.filter(id__in=member_ids)
+            board.members.set(users)
 
-        return super().create(validated_data)
+        return board
 
     def update(self, instance, validated_data):
+        member_ids = validated_data.pop("members", None)
+
         instance = super().update(instance, validated_data)
 
-        # nach Update: member_count aus dem gespeicherten Wert berechnen
-        instance.member_count = len(instance.members or [])
-        instance.save(update_fields=["member_count"])
+        if member_ids is not None:
+            users = User.objects.filter(id__in=member_ids)
+            instance.members.set(users)
 
         return instance
     
-class BoardDetailSerializer (serializers.ModelSerializer):
-    # tasks = models.JSONField(default=list, blank=True)
-    members = serializers.SerializerMethodField()
-    
+class MemberSerializer(serializers.ModelSerializer):
+    fullname = serializers.SerializerMethodField()
+
     class Meta:
-        model = BoardsDetailView        
-        fields = ['id', 'title', 'owner_id', 'members']
+        model = User
+        fields = ["id", "email", "fullname"]
 
-    def get_members(self, obj):
-        return [
-            {
-                "id": u.id,
-                "fullname": u.get_full_name(),
-                "email": u.email,
-            }
-            for u in User.objects.filter(id__in=obj.members)
-        ]
+    def get_fullname(self, obj):
+        return obj.get_full_name() or obj.get_username()
 
+
+class BoardDetailSerializer(serializers.ModelSerializer):
+    owner_id = serializers.IntegerField(source="owner.id", read_only=True)
+    members = MemberSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Boards
+        fields = ["id", "title", "owner_id", "members"]
