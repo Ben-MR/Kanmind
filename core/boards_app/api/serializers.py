@@ -6,10 +6,6 @@ User = get_user_model()
 
 
 class BoardsListSerializer(serializers.ModelSerializer):
-    # Frontend contract:
-    # - owner_id: int (read-only)
-    # - members: [int] (read/write)
-
     owner_id = serializers.IntegerField(read_only=True)
     member_count = serializers.IntegerField(read_only=True)
 
