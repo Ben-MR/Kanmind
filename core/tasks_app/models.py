@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from boards_app.models import Boards
+from django.utils import timezone
 
 class Task(models.Model):
     class Status(models.TextChoices):
@@ -44,4 +45,17 @@ class Task(models.Model):
     due_date = models.DateField(null=True, blank=True)
     comments_count = models.IntegerField(default=0)
 
+class Comment(models.Model):
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    created_at= models.DateField(auto_now_add=True)
+    author= models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comments_boards",
+    )
+    content= models.TextField(blank=True)
 

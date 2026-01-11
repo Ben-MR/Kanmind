@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from tasks_app.models import Task 
-from boards_app.models import Boards
+from tasks_app.models import Task, Comment
 
 
 User = get_user_model()
@@ -44,17 +43,16 @@ class TasksSerializer(serializers.ModelSerializer):
         validated_data.setdefault("assignee", self.context["request"].user)
         return super().create(validated_data)
     
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+    class Meta:
+        model = Comment
+        fields = ["id", "created_at", "author", 'content']
 
-
-    # def create(self, validated_data):
-    #     board_id = validated_data.pop("tasks", [])
-    #     board = Task.objects.create(**validated_data)
-
-    #     if board_id:
-    #         users = User.objects.filter(id__in=board_id)
-    #         board.tasks.set(users)
-
-    #     return board
-
-class AssignedToMeSerializer(serializers.ModelSerializer):
-    pass
+    def get_author(self, obj):
+        user = obj.author
+        return user.get_full_name() or user.get_username()
+    
+    def create(self, validated_data):
+        validated_data["author"] = self.context["request"].user
+        return super().create(validated_data)
