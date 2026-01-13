@@ -7,7 +7,7 @@ User = get_user_model()
 
 class AssigneeSerializer(serializers.ModelSerializer):
     fullname = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = User
         fields = ["id", "email", "fullname"]
@@ -18,6 +18,7 @@ class AssigneeSerializer(serializers.ModelSerializer):
 class TasksSerializer(serializers.ModelSerializer):
     assignee = AssigneeSerializer(read_only=True)
     reviewer = AssigneeSerializer(read_only=True)    
+    comments_count = serializers.SerializerMethodField()
     
     assignee_id = serializers.PrimaryKeyRelatedField(
         source="assignee",
@@ -42,6 +43,9 @@ class TasksSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.setdefault("assignee", self.context["request"].user)
         return super().create(validated_data)
+    
+    def get_comments_count_count(self, task):
+        return Comment.objects.filter(task=task).count()
     
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField()

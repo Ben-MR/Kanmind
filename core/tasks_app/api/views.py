@@ -1,7 +1,8 @@
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from tasks_app.models import Task
+from tasks_app.models import Task, Comment
 from .serializers import TasksSerializer, CommentSerializer
 from rest_framework.response import Response
 
@@ -36,3 +37,9 @@ class TasksViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(task=task)  
         return Response(serializer.data)
+    
+    @action(detail=True, methods=["get"], url_path=r"comments/(?P<comment_id>\d+)")
+    def comment_detail(self, request, pk=None, comment_id=None):
+ 
+        comment = get_object_or_404(Comment, pk=comment_id, task_id=pk)
+        return Response(CommentSerializer(comment).data)

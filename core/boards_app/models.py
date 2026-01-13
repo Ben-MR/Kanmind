@@ -4,11 +4,6 @@ from django.db import models
 
 class Boards(models.Model):
     title = models.CharField(max_length=100, blank=True, null=True)
-
-    ticket_count = models.IntegerField(default=0)
-    tasks_to_do_count = models.IntegerField(default=0)
-    tasks_high_prio_count = models.IntegerField(default=0)
-
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -17,7 +12,7 @@ class Boards(models.Model):
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         blank=True,
-        related_name="member_boards",
+        related_name="member_boards", 
     )
 
     @property
