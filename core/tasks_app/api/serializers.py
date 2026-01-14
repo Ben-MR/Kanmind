@@ -44,7 +44,7 @@ class TasksSerializer(serializers.ModelSerializer):
         validated_data.setdefault("assignee", self.context["request"].user)
         return super().create(validated_data)
     
-    def get_comments_count_count(self, task):
+    def get_comments_count(self, task):
         return Comment.objects.filter(task=task).count()
     
 class CommentSerializer(serializers.ModelSerializer):
