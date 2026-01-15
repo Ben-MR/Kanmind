@@ -5,8 +5,8 @@ from django.utils import timezone
 
 class Task(models.Model):
     class Status(models.TextChoices):
-        TODO = 'todo', 'to-do'
-        IN_PROGRESS = 'in_progress', 'in-progress'
+        TODO = 'to-do', 'to-do'
+        IN_PROGRESS = 'in-progress', 'in-progress'
         REVIEW = 'review', 'review'
         DONE = 'done', 'done'
 

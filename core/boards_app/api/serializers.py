@@ -34,6 +34,7 @@ class BoardsListSerializer(serializers.ModelSerializer):
         members = validated_data.pop("members", [])
         board = Boards.objects.create(**validated_data)
         board.members.set(members)   
+        board.members.add(self.context["request"].user.id)
         return board
 
     def to_representation(self, instance):

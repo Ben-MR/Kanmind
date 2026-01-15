@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import RegistrationsSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.models import Token
 
 class UserProfileList(generics.ListCreateAPIView):
     queryset = UserProfile.objects.all()
@@ -24,7 +25,7 @@ class RegistrationsView(APIView):
 
         if serializer.is_valid():
             saved_account = serializer.save()
-            token, created = AuthToken.objects.get_or_create(user=saved_account)
+            token, _ = Token.objects.get_or_create(user=saved_account)
             data = {
                 'token':token.key,
                 'fullname':saved_account.first_name,
@@ -39,29 +40,33 @@ class RegistrationsView(APIView):
     
 class CustomLogin(ObtainAuthToken):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
-    def post (self, request):
-        serializer = self.serializer_class(data=request.data)
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
 
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            token, created = AuthToken.objects.get_or_create(user=user)
-            data = {
-                'token':token.key,
-                'fullname':user.first_name,
-                'email': user.email,
-                'user_id': user.id,           
-            }
-        else:
-            data = serializer.errors
-    
-        return Response(data)
+        # Frontend sendet email -> DRF erwartet username
+        if "username" not in data and "email" in data:
+            data["username"] = data["email"]
+
+        serializer = self.serializer_class(data=data, context={"request": request})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        user = serializer.validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            "token": token.key,
+            "fullname": user.first_name,
+            "email": user.email,
+            "user_id": user.id,
+        }, status=200)
     
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        request.user.auth_token.delete()
         return Response({"message": "Logged out successfully"}, status=200)
     
 class EmailCheckView(APIView):
