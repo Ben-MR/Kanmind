@@ -6,5 +6,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('user_auth_app.api.urls')),
     path('api/email-check/', EmailCheckView.as_view(), name='email-check'),
-    path('api/', include('api.urls')),
+    path("api/", include("core.api.urls")),
 ]
