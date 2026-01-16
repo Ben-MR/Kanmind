@@ -94,14 +94,10 @@ class BoardsListSerializer(serializers.ModelSerializer):
         - If 'members' is provided, the member list is replaced.
         - If 'members' is not provided, the existing members remain unchanged.
         """
-        member_ids = validated_data.pop("members", None)
-
+        members = validated_data.pop("members", None)
         instance = super().update(instance, validated_data)
-
-        if member_ids is not None:
-            users = User.objects.filter(id__in=member_ids)
-            instance.members.set(users)
-
+        if members is not None:
+            instance.members.set(members)  
         return instance
 
     def get_tasks_high_prio_count(self, board):
