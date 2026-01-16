@@ -6,6 +6,3 @@ router = routers.SimpleRouter()
 router.register(r'', BoardsViewSet, basename="boards")
 urlpatterns = router.urls
 
-# urlpatterns = [
-#     path('', BoardsListViewSet.as_view(), name='boards_list'),
-# ]
