@@ -54,3 +54,51 @@ backend/
 ├── tasks_app/
 ├── static/
 └── requirements.txt
+
+PROJECT STRUCTURE
+
+backend/
+├── db.sqlite3
+├── core/
+│   ├── manage.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── user_auth_app/
+├── boards_app/
+├── tasks_app/
+├── static/
+└── requirements.txt
+
+
+SETUP (DJANGO STANDARD)
+
+1. Create virtual environment
+python -m venv venv
+activate venv
+
+2. Install dependencies
+pip install -r requirements.txt
+
+3. Apply migrations
+python core/manage.py migrate
+
+4. Create superuser (optional)
+python core/manage.py createsuperuser
+
+5. Run development server
+python core/manage.py runserver
+
+ACCESS
+Admin:
+http://127.0.0.1:8000/admin/
+
+API:
+http://127.0.0.1:8000/
+
+
+NOTES
+- Backend only
+- Frontend is separate
+- SQLite is for development only
+
