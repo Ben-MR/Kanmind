@@ -1,9 +1,11 @@
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from .permissions import IsTaskOrBoardOwner
 from tasks_app.models import Task, Comment
 from .serializers import TasksSerializer, CommentSerializer
 
@@ -28,6 +30,15 @@ class TasksViewset(viewsets.ModelViewSet):
 
     # Serializer used for Task objects.
     serializer_class = TasksSerializer
+
+    #User as creator of the board
+    def perform_create(self, serializer):
+      serializer.save(created_by=self.request.user)
+
+    def get_permissions(self):
+      if self.action == "destroy":
+          return [IsAuthenticated(), IsTaskOrBoardOwner()]
+      return [IsAuthenticated()]
 
     @action(detail=False, methods=["get"], url_path="assigned-to-me")
     def assigned_to_me(self, request):
@@ -72,17 +83,33 @@ class TasksViewset(viewsets.ModelViewSet):
         serializer.save(task=task)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["get"], url_path=r"comments/(?P<comment_id>\d+)")
+    @action(detail=True, methods=["get", "delete"], url_path=r"comments/(?P<comment_id>\d+)")
     def comment_detail(self, request, pk=None, comment_id=None):
         """
-        Retrieve a single comment belonging to a specific task.
+        Retrieve or delete a single comment that belongs to a specific task.
 
-        Endpoint:
-          GET /tasks/{id}/comments/{comment_id}/
+        Routes:
+          - GET    /tasks/{task_id}/comments/{comment_id}/
+          - DELETE /tasks/{task_id}/comments/{comment_id}/
 
-        Safety:
-          The lookup ensures that the comment belongs to the given task,
-          preventing access to comments of other tasks.
+        Purpose:
+          - GET returns the full serialized comment object.
+          - DELETE removes the comment and returns 204 No Content.
+
+        Safety / Access Control:
+          The lookup includes both the comment ID and the task ID:
+            Comment(pk=comment_id, task_id=pk)
+          This guarantees that the comment must belong to the given task and
+          prevents accessing or deleting comments from other tasks.
+
+        Parameters:
+          - pk: task ID (from the parent task route)
+          - comment_id: comment ID (captured via the url_path regex)
         """
         comment = get_object_or_404(Comment, pk=comment_id, task_id=pk)
-        return Response(CommentSerializer(comment).data)
+
+        if request.method == "GET":
+            return Response(CommentSerializer(comment).data)
+
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from boards_app.models import Boards
-from .serializers import BoardsListSerializer, BoardDetailSerializer
+from .serializers import BoardUpdateSerializer, BoardsListSerializer, BoardDetailSerializer
 from .permissions import IsOwnerOrMember
 
 
@@ -18,8 +18,12 @@ class BoardsViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Boards.objects.all()
-    serializer_class = BoardsListSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrMember]
+
+    serializer_list_class = BoardsListSerializer
+    serializer_detail_class = BoardsListSerializer
+    serializer_create_class = BoardsListSerializer
+    serializer_update_class = BoardUpdateSerializer
 
     def get_queryset(self):
         """
@@ -36,17 +40,47 @@ class BoardsViewSet(viewsets.ModelViewSet):
         return Boards.objects.filter(
             Q(owner=user) | Q(members=user)
         ).distinct()
-
+    
     def get_serializer_class(self):
         """
-        Select the serializer class based on the current action.
+        Return the appropriate serializer class depending on the current action.
 
-        - retrieve → BoardDetailSerializer (includes members and tasks)
-        - all other actions → BoardsListSerializer (list/create/update)
+        Serializer selection logic:
+
+        - list:
+            Returns BoardsListSerializer.
+            Used for listing all boards accessible to the user.
+
+        - create:
+            Returns BoardsListSerializer.
+            Used for creating a new board. Accepts member IDs and returns
+            aggregated board information.
+
+        - retrieve:
+            Returns BoardDetailSerializer.
+            Used for fetching a single board with full detail information,
+            including members and tasks.
+
+        - update / partial_update:
+            Returns BoardUpdateSerializer.
+            Used for updating an existing board.
+            The response structure differs from GET and includes:
+            - owner_data (full owner object)
+            - members_data (full member objects)
+
+        This approach allows different response structures per action
+        while keeping request validation and serialization logic clean
+        and explicit.
         """
+        if self.action == "create":
+            return self.serializer_create_class
         if self.action == "retrieve":
-            return BoardDetailSerializer
-        return BoardsListSerializer
+            return self.serializer_detail_class
+        if self.action == "list":
+            return self.serializer_list_class
+        if self.action in ["update", "partial_update"]:
+            return self.serializer_update_class
+        return super().get_serializer_class()
 
     def perform_create(self, serializer):
         """

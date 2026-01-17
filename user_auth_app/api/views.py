@@ -198,6 +198,7 @@ class EmailCheckView(APIView):
         email = request.query_params.get("email", "")
 
         serializer = self.serializer_class(data={"email": email})
-        serializer.is_valid(raise_exception=True)
-
-        return Response(serializer.to_representation(serializer.validated_data))
+        
+        if serializer.is_valid(raise_exception=True):
+            return Response(serializer.to_representation(serializer.validated_data))
+        return Response(serializer.errors, status=404)

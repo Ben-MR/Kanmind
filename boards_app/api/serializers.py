@@ -142,7 +142,7 @@ class MemberSerializer(serializers.ModelSerializer):
         otherwise fall back to the username.
         """
         return obj.get_full_name() or obj.get_username()
-
+    
 
 class BoardDetailSerializer(serializers.ModelSerializer):
     """
@@ -161,3 +161,41 @@ class BoardDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boards
         fields = ["id", "title", "owner_id", "members", "tasks"]
+
+
+class OwnerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for displaying board owner.
+    """
+
+    fullname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ["id", "email", "fullname"]
+
+    def get_fullname(self, obj):
+        """
+        Return the user's full name if available,
+        otherwise fall back to the username.
+        """
+        return obj.get_full_name() or obj.get_username()
+    
+
+class BoardUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for update board detail views.
+
+    Includes:
+    - Full owner object
+    - Full member objects
+    - All related tasks
+    """
+
+    owner_data = OwnerSerializer(source="owner", read_only=True)
+    members_data = MemberSerializer(source="members", many=True, read_only=True)
+   
+
+    class Meta:
+        model = Boards
+        fields = ["id", "title", "owner_data", "members_data"]

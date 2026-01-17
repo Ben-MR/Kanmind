@@ -30,6 +30,16 @@ class Task(models.Model):
         MEDIUM = "medium", "medium"
         HIGH = "high", "high"
 
+    #Creator of the task
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="owned_tasks",
+        null=True,
+        blank=True,
+        help_text="User who created the task."
+    )
+    
     # Board this task is associated with.
     board = models.ForeignKey(
         Boards,
