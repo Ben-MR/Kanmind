@@ -1,6 +1,6 @@
-DJANGO KANBAN BOARD – BACKEND API
+###DJANGO KANBAN BOARD – BACKEND API
 
-DESCRIPTION
+##DESCRIPTION
 This repository contains the backend API of a Kanban-style project management system.
 The backend is built with Django and Django REST Framework and provides core functionality
 for authentication, board management, task handling, and comments.
@@ -9,7 +9,7 @@ Frontend and backend are maintained in separate repositories.
 This repository contains backend code only.
 
 
-FEATURES
+##FEATURES
 - User registration and token-based authentication
 - Board management with owners and members
 - Task management per board
@@ -21,7 +21,7 @@ FEATURES
 - Suitable for API testing with Postman or curl
 
 
-TECH STACK
+##TECH STACK
 - Python 3.11+
 - Django 6.x
 - Django REST Framework
@@ -31,86 +31,70 @@ TECH STACK
 - Gunicorn
 
 
-PROJECT STRUCTURE
-backend/
-├── db.sqlite3
-├── core/
-│   ├── manage.py
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── user_auth_app/
-├── boards_app/
-├── tasks_app/
-├── static/
-└── requirements.txt
+##SETUP & INSTALLATION
 
-
-SETUP & INSTALLATION
-
-1. Clone the repository
+#1. Clone the repository
 git clone <repository-url>
 cd backend
 
-2. Create a virtual environment
+#2. Create a virtual environment
 python -m venv venv
 
-Activate it:
+#Activate it:
 Linux / macOS:
 source venv/bin/activate
 
-Windows:
+#Windows:
 venv\Scripts\activate
 
-3. Install dependencies
+#3. Install dependencies
 pip install -r requirements.txt
 
-4. Apply database migrations
+#4. Apply database migrations
 python core/manage.py migrate
 
-5. Create a superuser (optional)
+#5. Create a superuser (optional)
 python core/manage.py createsuperuser
 
-6. Start the development server
+#6. Start the development server
 python core/manage.py runserver
 
-Server address:
+#Server address:
 http://127.0.0.1:8000/
 
 
-USAGE
+##USAGE
 
-Authentication:
+#Authentication:
 - Obtain a token via the login endpoint
 - Include the token in all authenticated requests:
   Authorization: Token <your_token>
 
-Boards:
+#Boards:
 - GET /boards/
 - POST /boards/
 - GET /boards/{id}/
 - PATCH /boards/{id}/
 
-Tasks:
+#Tasks:
 - GET /tasks/
 - POST /tasks/
 - GET /tasks/{id}/
 - PATCH /tasks/{id}/
 
-Comments:
+#Comments:
 - GET /tasks/{id}/comments/
 - POST /tasks/{id}/comments/
 - GET /tasks/{id}/comments/{comment_id}/
 - DELETE /tasks/{id}/comments/{comment_id}/
 
 
-NOTES
+#NOTES
 - Backend-only project
 - Frontend is handled in a separate repository
 - SQLite is used for development purposes only
 - Not intended for production use
 
 
-LICENSE
+#LICENSE
 MIT License
