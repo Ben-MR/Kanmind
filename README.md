@@ -1,104 +1,100 @@
-# Django Kanban Board – Backend (DRF)
+# DJANGO KANBAN BOARD – BACKEND API
 
-This repository contains the **backend** of a simple Kanban/board system built with **Django** and **Django Rest Framework**.  
-The project is intended as a **practice project** and deliberately uses **SQLite** as the database.
+## DESCRIPTION
+This repository contains the backend API of a Kanban-style project management system.
+The backend is built with Django and Django REST Framework and provides core functionality
+for authentication, board management, task handling, and comments.
 
-The frontend consists of static HTML/JavaScript files and is maintained separately from the backend.
+Frontend and backend are maintained in separate repositories.
+This repository contains backend code only.
 
----
 
-## Features
+## FEATURES
+- User registration and token-based authentication
+- Board management with owners and members
+- Task management per board
+- Comment system for tasks
+- Role- and permission-based access control
+- Aggregated board statistics
+- RESTful API built with Django REST Framework
+- PEP8-compliant codebase
+- Suitable for API testing with Postman or curl
 
-- User registration and login (token-based authentication)
-- Email-based login (email = username)
-- Boards with:
-  - Owner (creator)
-  - Members (many-to-many)
-- Tasks per board
-- Access control:
-  - Only owners or members can access a board
-- Aggregated board data:
-  - Member count
-  - Total task count
-  - TODO task count
-  - High-priority task count
-- REST API using Django Rest Framework
 
----
-
-## Tech Stack
-
+## TECH STACK
 - Python 3.11+
 - Django 6.x
-- Django Rest Framework
-- SQLite (for practice purposes)
+- Django REST Framework
 - DRF TokenAuthentication
+- SQLite (development and learning purposes)
 - django-cors-headers
-- Gunicorn (deployment)
-
----
-
-## Project Structure
-
-```text
-backend/
-├── db.sqlite3
-├── core/
-│   ├── manage.py
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── user_auth_app/
-├── boards_app/
-├── tasks_app/
-├── static/
-└── requirements.txt
-
-PROJECT STRUCTURE
-
-backend/
-├── db.sqlite3
-├── core/
-│   ├── manage.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── user_auth_app/
-├── boards_app/
-├── tasks_app/
-├── static/
-└── requirements.txt
+- Gunicorn
 
 
-SETUP (DJANGO STANDARD)
+## SETUP & INSTALLATION
 
-1. Create virtual environment
+### 1. Clone the repository
+git clone <repository-url>
+cd backend
+
+### 2. Create a virtual environment
 python -m venv venv
-activate venv
 
-2. Install dependencies
+### Activate it:
+Linux / macOS:
+source venv/bin/activate
+
+### Windows:
+venv\Scripts\activate
+
+### 3. Install dependencies
 pip install -r requirements.txt
 
-3. Apply migrations
+### 4. Apply database migrations
 python core/manage.py migrate
 
-4. Create superuser (optional)
+### 5. Create a superuser (optional)
 python core/manage.py createsuperuser
 
-5. Run development server
+### 6. Start the development server
 python core/manage.py runserver
 
-ACCESS
-Admin:
-http://127.0.0.1:8000/admin/
-
-API:
+### Server address:
 http://127.0.0.1:8000/
 
 
-NOTES
-- Backend only
-- Frontend is separate
-- SQLite is for development only
+## USAGE
 
+### Authentication:
+- Obtain a token via the login endpoint
+- Include the token in all authenticated requests:
+  Authorization: Token <your_token>
+
+### Boards:
+- GET /boards/
+- POST /boards/
+- GET /boards/{id}/
+- PATCH /boards/{id}/
+
+### Tasks:
+- GET /tasks/
+- POST /tasks/
+- GET /tasks/{id}/
+- PATCH /tasks/{id}/
+
+### Comments:
+- GET /tasks/{id}/comments/
+- POST /tasks/{id}/comments/
+- GET /tasks/{id}/comments/{comment_id}/
+- DELETE /tasks/{id}/comments/{comment_id}/
+
+
+### NOTES
+- Backend-only project
+- Frontend is handled in a separate repository
+- SQLite is used for development purposes only
+- Not intended for production use
+
+
+### LICENSE
+MIT License
