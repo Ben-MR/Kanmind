@@ -55,7 +55,9 @@ backend/
 ├── static/
 └── requirements.txt
 
-PROJECT STRUCTURE
+---
+
+##PROJECT STRUCTURE
 
 backend/
 ├── db.sqlite3
