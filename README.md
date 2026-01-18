@@ -30,37 +30,68 @@ This repository contains backend code only.
 - django-cors-headers
 - Gunicorn
 
+## Project Structure
+
+  project/
+│
+├── auth_app/
+├── boards_app/
+├── core/
+├── tasks_app/
+│
+├── requirements.txt
+├── manage.py
+└── README.md
+
 
 ## SETUP & INSTALLATION
 
 ### 1. Clone the repository
+```bash
 git clone <repository-url>
 cd backend
+```
 
 ### 2. Create a virtual environment
+```bash
 python -m venv venv
+```
 
 ### Activate it:
+```bash
 Linux / macOS:
 source venv/bin/activate
+```
 
 ### Windows:
+```bash
 venv\Scripts\activate
+```
 
 ### 3. Install dependencies
+```bash
 pip install -r requirements.txt
+```
 
 ### 4. Apply database migrations
+```bash
 python core/manage.py migrate
+```
 
 ### 5. Create a superuser (optional)
+```bash
 python core/manage.py createsuperuser
+```
 
 ### 6. Start the development server
+```bash
 python core/manage.py runserver
+```
 
 ### Server address:
+```bash
 http://127.0.0.1:8000/
+```
 
 
 ## USAGE
