@@ -77,20 +77,20 @@ class RegistrationsView(APIView):
             Response: 200 with token payload or validation errors.
         """
         serializer = RegistrationsSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        if serializer.is_valid():
-            saved_account = serializer.save()
-            token, _ = Token.objects.get_or_create(user=saved_account)
-            data = {
+        saved_account = serializer.save()
+        token, _ = Token.objects.get_or_create(user=saved_account)
+
+        return Response(
+            {
                 "token": token.key,
                 "fullname": saved_account.first_name,
                 "email": saved_account.email,
                 "user_id": saved_account.id,
-            }
-        else:
-            data = serializer.errors
-
-        return Response(data)
+            },
+            status=200,
+        )
 
 
 class CustomLogin(ObtainAuthToken):

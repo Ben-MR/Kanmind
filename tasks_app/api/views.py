@@ -5,7 +5,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
-from .permissions import IsTaskOrBoardOwner
+from rest_framework.exceptions import PermissionDenied
+from boards_app.models import Boards
+from .permissions import IsTaskOrBoardOwner, CanCreateTaskOnBoard
 from tasks_app.models import Task, Comment
 from .serializers import TasksSerializer, CommentSerializer
 
@@ -24,16 +26,51 @@ class TasksViewset(viewsets.ModelViewSet):
     Additional custom actions are defined below to filter tasks for the
     authenticated user and to handle task-related comments.
     """
-
-    # Base queryset for all actions in this ViewSet.
+        # Base queryset for all actions in this ViewSet.
     queryset = Task.objects.all()
 
     # Serializer used for Task objects.
     serializer_class = TasksSerializer
 
+    permission_classes = [IsAuthenticated, CanCreateTaskOnBoard]
+
     #User as creator of the board
-    def perform_create(self, serializer):
-      serializer.save(created_by=self.request.user)
+    """
+    Create a new task on a specific board.
+
+    Access rules:
+    - The referenced board must exist.
+    - Only the board owner or board members are allowed
+      to create tasks on that board.
+
+    Request body requirements:
+    - `board`: ID of the board the task belongs to
+    - other task fields as defined in the serializer
+
+    Behavior:
+    - If the board does not exist → 404 Not Found
+    - If the user is not owner or member of the board → 403 Forbidden
+    - If request data is invalid → 400 Bad Request
+    - On success → 201 Created with serialized task data
+
+    Notes:
+    - The task creator is set automatically to the authenticated user.
+    - Board ownership and membership are enforced explicitly at the view level
+      instead of relying solely on DRF permissions.
+    """
+    def create(self, request, *args, **kwargs):
+        board_id = request.data.get("board")
+        board = get_object_or_404(Boards, pk=board_id)
+
+        user = request.user
+        if not (board.owner_id == user.id or board.members.filter(id=user.id).exists()):
+            raise PermissionDenied("You are not allowed to create tasks on this board.")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=user, board=board)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_permissions(self):
       if self.action == "destroy":
@@ -73,6 +110,11 @@ class TasksViewset(viewsets.ModelViewSet):
         POST /tasks/{id}/comments/  -> create a comment for a task
         """
         task = self.get_object()
+        board = task.board
+        user = request.user
+
+        if not (board.owner_id == user.id or board.members.filter(id=user.id).exists()):
+            raise PermissionDenied("Not allowed to comment on this board.")
 
         if request.method == "GET":
             qs = Comment.objects.filter(task=task).order_by("-created_at")

@@ -21,7 +21,7 @@ class BoardsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsOwnerOrMember]
 
     serializer_list_class = BoardsListSerializer
-    serializer_detail_class = BoardsListSerializer
+    serializer_detail_class = BoardDetailSerializer
     serializer_create_class = BoardsListSerializer
     serializer_update_class = BoardUpdateSerializer
 
