@@ -31,7 +31,7 @@ This repository contains backend code only.
 - Gunicorn
 
 ## Project Structure
-
+```text
   project/
 │
 ├── auth_app/
@@ -42,6 +42,7 @@ This repository contains backend code only.
 ├── requirements.txt
 ├── manage.py
 └── README.md
+```
 
 
 ## SETUP & INSTALLATION
