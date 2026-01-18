@@ -50,10 +50,12 @@ This repository contains backend code only.
 ```bash
 git clone <repository-url>
 cd backend
+```
 
 ### 2. Create a virtual environment
 ```bash
 python -m venv venv
+```
 
 ### Activate it:
 ```bash
