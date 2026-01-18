@@ -30,17 +30,33 @@ This repository contains backend code only.
 - django-cors-headers
 - Gunicorn
 
+## Project Structure
+
+  project/
+│
+├── auth_app/
+├── boards_app/
+├── core/
+├── tasks_app/
+│
+├── requirements.txt
+├── manage.py
+└── README.md
+
 
 ## SETUP & INSTALLATION
 
 ### 1. Clone the repository
+```bash
 git clone <repository-url>
 cd backend
 
 ### 2. Create a virtual environment
+```bash
 python -m venv venv
 
 ### Activate it:
+```bash
 Linux / macOS:
 source venv/bin/activate
 
